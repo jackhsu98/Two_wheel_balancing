@@ -7,8 +7,8 @@
 #include <math.h>
 extern timee;
 
-uint16_t CCR3_Val = 720;
-uint16_t CCR4_Val = 720;
+uint16_t CCR3_Val = 648;
+uint16_t CCR4_Val = 612;
 uint16_t PrescalerValue = 0;
 TIM_OCInitTypeDef  TIM_OCInitStructure;
 void delay(uint32_t delay_count)
@@ -98,11 +98,10 @@ int main(void)
 	float phi;
 	float error;
 	float derivative;
-	float dt = 0.1;
 	float previous_error = 0.0;
 	float setpoint = 0.0;
-	float Kp=100.0;
-	float Kd=10.0;
+	float Kp= 100.0;
+	float Kd= 2.0;
 	init_led();
 	init_usart1();
 	init_tim4_pwm();
@@ -123,36 +122,31 @@ int main(void)
 		for ( int i = 0; i<3; i++)
 			gyro[i] = (buff[i+2]/131.0);
 
-		theta = 2*atanf(acc[0]/acc[2]);
-		phi = atanf(gyro[2]/gyro[0]);
-		//printf("Theta,%f\r\n",theta);
-		error = setpoint - phi;
-		printf("Error,%f\r\n",error);
-		derivative = (error - previous_error)/dt;
-		printf("Derivative,%f\r\n",derivative); 
+		theta = atanf(acc[2]/acc[0]);
+		error = setpoint - theta;
+		derivative = gyro[1];
 
 		CCR3_Val = CCR3_Val+(Kp*error+Kd*derivative);
 		CCR4_Val = CCR4_Val-(Kp*error+Kd*derivative);
-		printf("CCR3_Val,%f\r\n",CCR3_Val);
-		printf("CCR4_Val,%f\r\n",CCR4_Val);
 		TIM4->CCR3 = CCR3_Val;
 		TIM4->CCR4 = CCR4_Val;
 		if ( (CCR3_Val>7200) || (CCR4_Val > 7200) ){
 
-			CCR3_Val = 720;
-			CCR4_Val = 720;
+			CCR3_Val = 648;
+			CCR4_Val = 612;
 
 		} else if ( (CCR3_Val < 200) || (CCR4_Val < 200) ){
 
-			CCR3_Val = 720;
-			CCR4_Val = 720;
+			CCR3_Val = 648;
+			CCR4_Val = 612;
 
 		}
-		previous_error = error;
+
+		setpoint=theta;
 
 		gpio_toggle(GPIOA, GPIO_Pin_0);
 		gpio_toggle(GPIOA, GPIO_Pin_1);
-		delay_gg(0.1);
+		delay_gg(0.01);
 
 	}
 }
