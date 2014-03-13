@@ -134,7 +134,7 @@ int main(void)
 	float theta;
 	float error;
 	float derivative;
-	float setpoint = 0.0;
+	float setpoint = atanf(-0.09/1.09);;
 	float Kp= 100.0;
 	float Kd= 2.0;
 	init_led();
