@@ -132,15 +132,14 @@ int main(void)
 	int16_t buff[6];
 	float acc[3],gyro[3];
 	float theta;
-	float phi;
 	float error;
 	float derivative;
-	float previous_error = 0.0;
 	float setpoint = 0.0;
 	float Kp= 100.0;
 	float Kd= 2.0;
 	init_led();
 	init_usart1();
+	init_tim2();
 	init_tim4_pwm();
 	MPU6050_I2C_Init();
 	MPU6050_Initialize();
