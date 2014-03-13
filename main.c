@@ -154,7 +154,7 @@ int main(void)
 		for ( int i = 0; i<3; i++)
 			gyro[i] = (buff[i+2]/131.0);
 
-		theta = atanf(acc[0]/acc[2])*180/PI;
+		theta = atanf(acc[0]/acc[2])*180/3.14;
 		error = setpoint - theta;
 		derivative = gyro[1];
 

@@ -38,7 +38,7 @@ void TIM4_IRQHandler()
 {
             
         if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET){
-                timee=timee+0.01;
+                timee=timee+1;
                 TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
         }
 }
