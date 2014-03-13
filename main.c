@@ -7,6 +7,8 @@
 #include <math.h>
 extern timee;
 
+#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
+
 uint16_t CCR3_Val = 648;
 uint16_t CCR4_Val = 612;
 uint16_t PrescalerValue = 0;
@@ -130,23 +132,32 @@ int main(void)
 		CCR4_Val = CCR4_Val-(Kp*error+Kd*derivative);
 		TIM4->CCR3 = CCR3_Val;
 		TIM4->CCR4 = CCR4_Val;
-		if ( (CCR3_Val>7200) || (CCR4_Val > 7200) ){
+		if  (CCR3_Val>1240){
 
-			CCR3_Val = 648;
-			CCR4_Val = 612;
+      CCR3_Val = 620;
 
-		} else if ( (CCR3_Val < 200) || (CCR4_Val < 200) ){
+    } else if (CCR3_Val < 0){
 
-			CCR3_Val = 648;
-			CCR4_Val = 612;
+      CCR3_Val = 620;
 
-		}
+    }
 
-		setpoint=theta;
 
-		gpio_toggle(GPIOA, GPIO_Pin_0);
-		gpio_toggle(GPIOA, GPIO_Pin_1);
-		delay_gg(0.01);
+        if(CCR4_Val > 1246){
+
+          CCR4_Val = 623;
+        
+        } else if (CCR4_Val < 0){
+
+      
+      CCR4_Val = 623;
+
+    }
+
+    setpoint=theta;
+
+    gpio_toggle(GPIOA, GPIO_Pin_0);
+    gpio_toggle(GPIOA, GPIO_Pin_1);
 
 	}
 }
