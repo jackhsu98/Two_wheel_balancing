@@ -23,23 +23,39 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "stm32f10x_conf.h"
+#include "stm32f10x.h"
+#include "MPU6050.h"
+#include <math.h>
+
+extern uint16_t CCR3_Val;
+extern uint16_t CCR4_Val;
+extern uint16_t PrescalerValue;
+
+extern float theta;
+extern float error;
+extern float derivative;
+extern float setpoint;
+extern float Kp;
+extern float Kd;
+#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
 //#include "led.h"
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
   */
-int timee=0;
+  int timee=0.0;
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-void TIM4_IRQHandler()
+void TIM2_IRQHandler()
 {
             
-        if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET){
-                timee=timee+0.01;
-                TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+        if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
+                timee++;
+                TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
         }
 }
 /******************************************************************************/
@@ -54,6 +70,57 @@ void TIM4_IRQHandler()
 void NMI_Handler(void)
 {
 }
+
+void SysTick_Handler(void)
+{
+    int16_t buff[6];
+    float acc[3],gyro[3];
+    setpoint= atanf(-0.09/1.09);
+    Kp= 5.0;
+    Kd= 0.0;
+    MPU6050_GetRawAccelGyro(buff);
+    for ( int i = 0; i<3; i++)
+      acc[i] = (buff[i]/16384.0);
+    for ( int i = 0; i<3; i++)
+      gyro[i] = (buff[i+2]/131.0);
+
+    theta = atanf(acc[0]/acc[2])*180/PI;
+    error = setpoint - theta;
+    derivative = gyro[1];
+
+    CCR3_Val = CCR3_Val-(Kp*error+Kd*derivative);
+    CCR4_Val = CCR4_Val+(Kp*error+Kd*derivative);
+    TIM4->CCR3 = CCR3_Val;
+    TIM4->CCR4 = CCR4_Val;
+
+    if  (CCR3_Val>1240){
+
+      CCR3_Val = 620;
+
+    } else if (CCR3_Val < 0){
+
+      CCR3_Val = 620;
+
+    }
+
+
+        if(CCR4_Val > 1246){
+
+          CCR4_Val = 623;
+        
+        } else if (CCR4_Val < 0){
+
+      
+      CCR4_Val = 623;
+
+    }
+
+    setpoint=theta;
+
+    gpio_toggle(GPIOA, GPIO_Pin_0);
+    gpio_toggle(GPIOA, GPIO_Pin_1);
+}
+
 
 /**
   * @brief  This function handles Hard Fault exception.
@@ -135,9 +202,6 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
-{
-}
 
 /******************************************************************************/
 /*                 STM32F10x Peripherals Interrupt Handlers                   */

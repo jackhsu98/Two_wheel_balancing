@@ -46,6 +46,7 @@ void init_usart1()
 	/* Enable the USART1 IRQ in the NVIC module (so that the USART1 interrupt
 	 * handler is enabled). */
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);

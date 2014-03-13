@@ -73,6 +73,9 @@ void assert_failed(uint8_t *file, uint32_t line);
 #define assert_param(expr) ((void)0)
 #endif /* USE_FULL_ASSERT */
 
+
+void init_led(void);
+void gpio_toggle(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin);
 #endif /* __STM32F10x_CONF_H */
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
