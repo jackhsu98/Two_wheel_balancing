@@ -34,12 +34,12 @@ int timee=0;
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-void TIM4_IRQHandler()
+void TIM2_IRQHandler()
 {
             
-        if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET){
+        if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET){
                 timee=timee+1;
-                TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+                TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
         }
 }
 /******************************************************************************/
