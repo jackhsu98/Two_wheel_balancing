@@ -9,17 +9,20 @@ extern int timee;
 
 //#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
 
-uint16_t CCR3_Val = 620;
-uint16_t CCR4_Val = 623;
+extern uint16_t CCR3_Val;
+extern uint16_t CCR4_Val;
 uint16_t PrescalerValue = 0;
-
-float theta;
-float error;
-float derivative;
-float setpoint;
-float Kp;
-float Kd;
 TIM_OCInitTypeDef  TIM_OCInitStructure;
+
+extern float theta;
+extern float error;
+extern float derivative;
+extern int16_t buff[6];
+extern float acc[3],gyro[3];
+extern float setpoint;
+extern float Kp;
+extern float Kd;
+
 
 void init_tim4_pwm()
 {	
@@ -43,8 +46,8 @@ void init_tim4_pwm()
  
   	
 	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 7200 - 1;
-	TIM_TimeBaseStructure.TIM_Prescaler = 200 -1;
+	TIM_TimeBaseStructure.TIM_Period = 57600 - 1;
+	TIM_TimeBaseStructure.TIM_Prescaler = 25 -1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
@@ -92,7 +95,7 @@ void init_tim2()
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = (uint16_t)(7200-1);
-	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10000-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10-1);
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -135,7 +138,7 @@ void init_tim3()
 	// TIM_PrescalerConfig(TIM2, PrescalerValue, TIM_PSCReloadMode_Immediate);
 
 	TIM_ITConfig( TIM3, TIM_IT_Update, ENABLE);
-	TIM_Cmd(TIM2, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
 }
 
 void init_led()
@@ -195,16 +198,19 @@ int main(void)
 			gyro[i] = (buff[i+2]/131.0);*/
 
 		//theta = atanf(acc[0]/acc[2])*180/PI;
-		printf("Theta: %f\r\n", theta);
+		printf("Theta: %f", theta);
 		//error = setpoint - theta;
+	    printf("Error: %f", error);
 		//derivative = gyro[1];
-		printf("Derivative: %f\r\n", derivative);
+		printf("Derivative: %f", derivative);
+		printf("KP : %f", Kp);
+		printf("KD : %f", Kd);
 
 		/*CCR3_Val = CCR3_Val-(Kp*error+Kd*derivative);
 		CCR4_Val = CCR4_Val+(Kp*error+Kd*derivative);
 		TIM4->CCR3 = CCR3_Val;
 		TIM4->CCR4 = CCR4_Val;*/
-        printf("CCR3: %d\r\n", CCR3_Val);
+        printf("CCR3: %d", CCR3_Val);
 		printf("CCR4: %d\r\n", CCR4_Val);
 		/*if  (CCR3_Val>1240){
 
@@ -232,7 +238,7 @@ int main(void)
 
         gpio_toggle(GPIOA, GPIO_Pin_0);
         gpio_toggle(GPIOA, GPIO_Pin_1);*/
-        delay_gg(1);
+        delay_gg(200);
 
 	}
 }
