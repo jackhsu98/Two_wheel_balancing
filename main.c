@@ -190,54 +190,18 @@ int main(void)
 	init_tim3();
 	//printf("test float%f\r\n",num);
 	while (1) {
-		//puts("running now\r\n");
-		/*MPU6050_GetRawAccelGyro(buff);
-		for ( int i = 0; i<3; i++)
-			acc[i] = (buff[i]/16384.0);
-		for ( int i = 0; i<3; i++)
-			gyro[i] = (buff[i+2]/131.0);*/
-
-		//theta = atanf(acc[0]/acc[2])*180/PI;
-		printf("Theta: %f", theta);
-		//error = setpoint - theta;
-	    printf("Error: %f", error);
-		//derivative = gyro[1];
-		printf("Derivative: %f", derivative);
-		printf("KP : %f", Kp);
-		printf("KD : %f", Kd);
-
-		/*CCR3_Val = CCR3_Val-(Kp*error+Kd*derivative);
-		CCR4_Val = CCR4_Val+(Kp*error+Kd*derivative);
-		TIM4->CCR3 = CCR3_Val;
-		TIM4->CCR4 = CCR4_Val;*/
-        printf("CCR3: %d", CCR3_Val);
+		
+		printf("Theta: %f", theta );
+	    printf("Error: %f", error );
+	    // printf("Gyro[0]: %f", gyro[0] );
+	    // printf("Gyro[1]: %f", gyro[1] );
+	    // printf("Gyro[2]: %f", gyro[2] );
+		printf("Derivative: %f", derivative );
+		printf("KP : %f", Kp );
+		printf("KD : %f", Kd );
+        printf("CCR3: %d", CCR3_Val );
 		printf("CCR4: %d\r\n", CCR4_Val);
-		/*if  (CCR3_Val>1240){
-
-			CCR3_Val = 620;
-
-        } else if (CCR3_Val < 0){
-
-            CCR3_Val = 620;
-
-        }
-
-
-        if(CCR4_Val > 1246){
-
-            CCR4_Val = 623;
-        
-        } else if (CCR4_Val < 0){
-
-      
-            CCR4_Val = 623;
-
-        }
-
-        setpoint=theta;
-
-        gpio_toggle(GPIOA, GPIO_Pin_0);
-        gpio_toggle(GPIOA, GPIO_Pin_1);*/
+		
         delay_gg(200);
 
 	}

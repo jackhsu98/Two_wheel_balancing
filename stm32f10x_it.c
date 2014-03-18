@@ -30,8 +30,8 @@
 #include <stdio.h>
 #include <math.h>
 
-uint16_t CCR3_Val = 4890;
-uint16_t CCR4_Val = 4920;
+uint16_t CCR3_Val = 4945;
+uint16_t CCR4_Val = 4945;
 //uint16_t PrescalerValue = 0;
 
 float theta;
@@ -40,8 +40,8 @@ float derivative;
 int16_t buff[6];
 float acc[3],gyro[3];
 float setpoint=0;
-float Kp = 5;
-float Kd = 0.0;
+float Kp = 300.0;
+float Kd = 15.0;
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
 //#include "led.h"
 /** @addtogroup STM32F10x_StdPeriph_Template
@@ -75,31 +75,31 @@ void TIM3_IRQHandler()
             acc[i] = (buff[i]/16384.0);
           for ( int i = 0; i<3; i++)
             gyro[i] = (buff[i+2]/131.0);
-          theta = atanf(acc[0]/acc[2])*180/PI;
+          theta = atanf(acc[0]/acc[2]);
                 //printf("Theta: %f\r\n", theta);
           error = setpoint - theta;
-          derivative = gyro[1];
+          derivative = gyro[2];
                 //printf("Derivative: %f\r\n", derivative);
 
-          CCR3_Val = 4890-(int16_t)(Kp*error+Kd*derivative);
-          CCR4_Val = 4920+(int16_t)(Kp*error+Kd*derivative);
+          CCR3_Val = 4945-(int16_t)(Kp*error+Kd*derivative);
+          CCR4_Val = 4945+(int16_t)(Kp*error+Kd*derivative);
           TIM4->CCR3 = CCR3_Val;
           TIM4->CCR4 = CCR4_Val;
                 //printf("CCR3: %d\r\n", CCR3_Val);
                 //printf("CCR4: %d\r\n", CCR4_Val);
-          if  (CCR3_Val>5890){
-            CCR3_Val = 4890;
-          } else if (CCR3_Val < 3890){
-            CCR3_Val = 4890;
+          if  (CCR3_Val>9890){
+            CCR3_Val = 4945;
+          } else if (CCR3_Val < 0){
+            CCR3_Val = 4945;
           }
 
-          if(CCR4_Val > 5920){
-            CCR4_Val = 4920;
-          } else if (CCR4_Val < 3920){
-            CCR4_Val = 4920;
+          if(CCR4_Val > 9890){
+            CCR4_Val = 4945;
+          } else if (CCR4_Val < 0){
+            CCR4_Val = 4945;
           }
 
-          setpoint=theta;
+          
 
           gpio_toggle(GPIOA, GPIO_Pin_0);
           gpio_toggle(GPIOA, GPIO_Pin_1);
