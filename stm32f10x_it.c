@@ -30,19 +30,40 @@
 #include <stdio.h>
 #include <math.h>
 
-uint16_t CCR3_Val = 4945;
-uint16_t CCR4_Val = 4945;
-//uint16_t PrescalerValue = 0;
+extern int16_t GYRO_X_OFFSET;
+extern int16_t GYRO_Y_OFFSET;
+extern int16_t GYRO_Z_OFFSET;
+extern int16_t ACC_X_OFFSET;
+extern int16_t ACC_Y_OFFSET;
+extern int16_t ACC_Z_OFFSET;
 
-float theta;
-float error;
-float derivative;
+uint16_t CCR3_Val = 4910;
+uint16_t CCR4_Val = 4935;
+
+float ax,ay,az,gyro_x,gyro_y,gyro_z;
+float pitch;
+float pitch1;
+float error1;
+float derivative1;
+float derivative2;
+float I = 0.0;
+float I_yaw = 0.0;
 int16_t buff[6];
 float acc[3],gyro[3];
-float setpoint=0;
-float Kp = 300.0;
-float Kd = 15.0;
-#define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679
+float setpoint_v=0;
+float Kp = 90.0;//100.0;
+float Ki = 0.0;//40.0;
+float Kd = 100.0;//30.0;
+float Kp_yaw = 5.0;//10.0;
+float Ki_yaw = 20.0;
+float AX = 0.0;
+float AZ = 0.0;
+float apha = 0.1;
+
+
+#define PI 3.1415926535
+#define R2D 57.29577951
+#define D2R 0.01745
 //#include "led.h"
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -63,6 +84,17 @@ void TIM2_IRQHandler()
         }
 }
 
+void boundary(float Max, float min, float *Target)
+{
+  if (*Target>Max)
+  {
+    *Target = Max;
+  } else if (*Target<min)
+  {
+    *Target = min;
+  } 
+}
+
 void TIM3_IRQHandler()
 {
             
@@ -72,31 +104,64 @@ void TIM3_IRQHandler()
           //puts("running now\r\n");
           MPU6050_GetRawAccelGyro(buff);
           for ( int i = 0; i<3; i++)
-            acc[i] = (buff[i]/16384.0);
+            acc[i] = buff[i];
           for ( int i = 0; i<3; i++)
-            gyro[i] = (buff[i+2]/131.0);
-          theta = atanf(acc[0]/acc[2]);
-                //printf("Theta: %f\r\n", theta);
-          error = setpoint - theta;
-          derivative = gyro[2];
-                //printf("Derivative: %f\r\n", derivative);
+            gyro[i] = buff[i+3];
+          
+          ax = (acc[0]-ACC_X_OFFSET)/16384.0;
+          ay = (acc[1]-ACC_Y_OFFSET)/16384.0;
+          az = (acc[2]-ACC_Z_OFFSET)/16384.0;
+          gyro_x = (gyro[0]-GYRO_X_OFFSET)/131.0;
+          gyro_y = (gyro[1]-GYRO_Y_OFFSET)/131.0;
+          gyro_z = (gyro[2]-GYRO_Z_OFFSET)/131.0;
 
-          CCR3_Val = 4945-(int16_t)(Kp*error+Kd*derivative);
-          CCR4_Val = 4945+(int16_t)(Kp*error+Kd*derivative);
-          TIM4->CCR3 = CCR3_Val;
-          TIM4->CCR4 = CCR4_Val;
-                //printf("CCR3: %d\r\n", CCR3_Val);
-                //printf("CCR4: %d\r\n", CCR4_Val);
-          if  (CCR3_Val>9890){
-            CCR3_Val = 4945;
-          } else if (CCR3_Val < 0){
-            CCR3_Val = 4945;
+          AX = AX*(1-apha)+ax*apha;
+          AZ = AZ*(1-apha)+az*apha;
+
+          pitch = atanf(ax/az)*R2D;
+          pitch1 = atanf(AX/AZ)*R2D;
+
+          derivative1 = gyro_y;
+          derivative2 = gyro_z;
+
+          error1 = setpoint_v - pitch1;
+          I = I + error1*0.002;
+          I_yaw =I_yaw + derivative2*0.002;
+
+          boundary(30,-30,&I);
+
+          // if (I>30)
+          // {
+          //   I = 30;
+          // } else if (I<-30)
+          // {
+          //   I = -30;
+          // }
+          
+           if (I_yaw>30)
+          {
+            I_yaw = 30;
+          } else if (I_yaw<-30)
+          {
+            I_yaw = -30;
           }
 
-          if(CCR4_Val > 9890){
-            CCR4_Val = 4945;
-          } else if (CCR4_Val < 0){
-            CCR4_Val = 4945;
+
+          CCR3_Val = 4910-(int16_t)(Kp*error1+Ki*I-Kd*derivative1)-(int16_t)(Kp_yaw*derivative2+Ki_yaw*I_yaw);
+          CCR4_Val = 4935+(int16_t)(Kp*error1+Ki*I-Kd*derivative1)-(int16_t)(Kp_yaw*derivative2+Ki_yaw*I_yaw);
+          TIM4->CCR3 = CCR3_Val;
+          TIM4->CCR4 = CCR4_Val;
+
+          if  (CCR3_Val>9819){
+            CCR3_Val = 9819;
+          } else if (CCR3_Val < 1){
+            CCR3_Val = 1;
+          }
+
+          if(CCR4_Val > 9869){
+            CCR4_Val = 9869;
+          } else if (CCR4_Val < 1){
+            CCR4_Val = 1;
           }
 
           

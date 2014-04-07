@@ -14,14 +14,19 @@ extern uint16_t CCR4_Val;
 uint16_t PrescalerValue = 0;
 TIM_OCInitTypeDef  TIM_OCInitStructure;
 
-extern float theta;
-extern float error;
-extern float derivative;
+extern float pitch;
+extern float pitch1;
+extern float error1;
+extern float derivative1;
+extern float derivative2;
 extern int16_t buff[6];
 extern float acc[3],gyro[3];
-extern float setpoint;
+extern float setpoint_v;
 extern float Kp;
 extern float Kd;
+extern float I;
+extern float I_yaw;
+extern float AX, AZ,ax, az;
 
 
 void init_tim4_pwm()
@@ -95,7 +100,7 @@ void init_tim2()
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = (uint16_t)(7200-1);
-	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(20-1);
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -127,7 +132,7 @@ void init_tim3()
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = (uint16_t)(7200-1);
-	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(10-1);
+	TIM_TimeBaseStructure.TIM_Prescaler = (uint16_t)(20-1);
 
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -165,16 +170,10 @@ void delay_gg(uint32_t count){
 		
 }
 
+
+
 int main(void)
 {
-	/*int16_t buff[6];
-	float acc[3],gyro[3];
-	float theta;
-	float error;
-	float derivative;
-	float setpoint = atanf(-0.09/1.09);
-	float Kp= 5.0;
-	float Kd= 0.0;*/
 	init_led();
 	init_usart1();
 	init_tim2();
@@ -187,22 +186,23 @@ int main(void)
 	}else {
 	   puts("connection failed\r\n");
 	}
+	imu_calibration();
 	init_tim3();
 	//printf("test float%f\r\n",num);
 	while (1) {
 		
-		printf("Theta: %f", theta );
-	    printf("Error: %f", error );
-	    // printf("Gyro[0]: %f", gyro[0] );
-	    // printf("Gyro[1]: %f", gyro[1] );
-	    // printf("Gyro[2]: %f", gyro[2] );
-		printf("Derivative: %f", derivative );
-		printf("KP : %f", Kp );
-		printf("KD : %f", Kd );
-        printf("CCR3: %d", CCR3_Val );
+		 
+		 // printf("Pitch1: %f", pitch1 );
+   //       printf("Pitch: %f\r\n", pitch );
+	 //    printf("Error1: %f\t", error1 );
+	 //    printf("I: %f\t", I );
+	    printf("I_yaw: %f\t", I_yaw );
+	 //    printf("Derivative1: %f\t", derivative1 );
+		// printf("Derivative2: %f\t", derivative2 );
+        printf("CCR3: %d\t", CCR3_Val );
 		printf("CCR4: %d\r\n", CCR4_Val);
 		
-        delay_gg(200);
+        delay_gg(10);
 
 	}
 }

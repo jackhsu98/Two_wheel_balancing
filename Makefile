@@ -55,6 +55,7 @@ SRC+=./MPU6050_lib/MPU6050.c
 #Major programs
 SRC+=./main.c \
 	./usart.c \
+	./imu.c \
 	./stm32f10x_it.c
 
 
