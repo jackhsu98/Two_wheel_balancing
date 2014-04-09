@@ -193,12 +193,14 @@ int main(void)
 		
 		 
 		 // printf("Pitch1: %f", pitch1 );
-   //       printf("Pitch: %f\r\n", pitch );
-	 //    printf("Error1: %f\t", error1 );
-	 //    printf("I: %f\t", I );
+        // printf("Pitch: %f\t", pitch );
+	    printf("Error1: %f\t", error1 );
+	    printf("I: %f\t", I );
 	    printf("I_yaw: %f\t", I_yaw );
-	 //    printf("Derivative1: %f\t", derivative1 );
+	    // printf("Derivative1: %f\r\n", derivative1 );
 		// printf("Derivative2: %f\t", derivative2 );
+        printf("TIM4->CCR3: %d\t",TIM4->CCR3 );
+        printf("TIM4->CCR4: %d\t",TIM4->CCR4 );
         printf("CCR3: %d\t", CCR3_Val );
 		printf("CCR4: %d\r\n", CCR4_Val);
 		

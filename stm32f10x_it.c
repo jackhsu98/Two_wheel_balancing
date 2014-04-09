@@ -44,6 +44,7 @@ float ax,ay,az,gyro_x,gyro_y,gyro_z;
 float pitch;
 float pitch1;
 float error1;
+float error2;
 float derivative1;
 float derivative2;
 float I = 0.0;
@@ -51,11 +52,12 @@ float I_yaw = 0.0;
 int16_t buff[6];
 float acc[3],gyro[3];
 float setpoint_v=0;
-float Kp = 90.0;//100.0;
-float Ki = 0.0;//40.0;
-float Kd = 100.0;//30.0;
-float Kp_yaw = 5.0;//10.0;
-float Ki_yaw = 20.0;
+float setpoint_h=0;
+float Kp = 90.0;//90.0;
+float Ki = 3.33;//3.33;
+float Kd = 7.5;//7.5;
+float Kp_yaw = 5.0;//5.0;
+float Ki_yaw = 5.0;//20.0;
 float AX = 0.0;
 float AZ = 0.0;
 float apha = 0.1;
@@ -85,6 +87,17 @@ void TIM2_IRQHandler()
 }
 
 void boundary(float Max, float min, float *Target)
+{
+  if (*Target>Max)
+  {
+    *Target = Max;
+  } else if (*Target<min)
+  {
+    *Target = min;
+  } 
+}
+
+void boundary_int16(int16_t Max, int16_t min, int16_t*Target)
 {
   if (*Target>Max)
   {
@@ -125,47 +138,22 @@ void TIM3_IRQHandler()
           derivative2 = gyro_z;
 
           error1 = setpoint_v - pitch1;
+          //error2 = setpoint_h - derivative2;
           I = I + error1*0.002;
           I_yaw =I_yaw + derivative2*0.002;
+          boundary(30.0,-30.0,&I);
+          boundary(30.0,-30.0,&I_yaw);
 
-          boundary(30,-30,&I);
-
-          // if (I>30)
-          // {
-          //   I = 30;
-          // } else if (I<-30)
-          // {
-          //   I = -30;
-          // }
           
-           if (I_yaw>30)
-          {
-            I_yaw = 30;
-          } else if (I_yaw<-30)
-          {
-            I_yaw = -30;
-          }
-
-
           CCR3_Val = 4910-(int16_t)(Kp*error1+Ki*I-Kd*derivative1)-(int16_t)(Kp_yaw*derivative2+Ki_yaw*I_yaw);
           CCR4_Val = 4935+(int16_t)(Kp*error1+Ki*I-Kd*derivative1)-(int16_t)(Kp_yaw*derivative2+Ki_yaw*I_yaw);
+          boundary_int16(9819,1,&CCR3_Val);
+          boundary_int16(9869,1,&CCR4_Val);
           TIM4->CCR3 = CCR3_Val;
           TIM4->CCR4 = CCR4_Val;
 
-          if  (CCR3_Val>9819){
-            CCR3_Val = 9819;
-          } else if (CCR3_Val < 1){
-            CCR3_Val = 1;
-          }
-
-          if(CCR4_Val > 9869){
-            CCR4_Val = 9869;
-          } else if (CCR4_Val < 1){
-            CCR4_Val = 1;
-          }
-
           
-
+          
           gpio_toggle(GPIOA, GPIO_Pin_0);
           gpio_toggle(GPIOA, GPIO_Pin_1);
           TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
